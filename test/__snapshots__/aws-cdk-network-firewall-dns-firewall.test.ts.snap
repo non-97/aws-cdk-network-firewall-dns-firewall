@@ -1,0 +1,1550 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`AwsCdkNetworkFirewallDnsFirewallStack スナップショット 1`] = `
+{
+  "Outputs": {
+    "ClientInstanceId": {
+      "Value": {
+        "Ref": "Client4A7F64DF",
+      },
+    },
+    "DnsServerPrivateIp": {
+      "Value": {
+        "Fn::GetAtt": [
+          "DnsServerFF4C19E7",
+          "PrivateIp",
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+    },
+  },
+  "Resources": {
+    "Client4A7F64DF": {
+      "DependsOn": [
+        "ClientInstanceRole5C37E2F7",
+        "ClientDhcpAssociation",
+      ],
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "IamInstanceProfile": {
+          "Ref": "ClientInstanceProfile89AE75A3",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.micro",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "ClientLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "ClientLaunchTemplate01B5BC16",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ClientSecurityGroupE3B38CB0",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "ClientVpcWorkloadSubnet1SubnetEE74BB22",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Client",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+set -uxo pipefail
+for i in $(seq 1 30); do
+  dnf install -y bind-utils && break
+  sleep 20
+done",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "ClientDhcpAssociation": {
+      "Properties": {
+        "DhcpOptionsId": {
+          "Ref": "ClientDhcpOptions",
+        },
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+    },
+    "ClientDhcpOptions": {
+      "Properties": {
+        "DomainNameServers": [
+          {
+            "Fn::GetAtt": [
+              "DnsServerFF4C19E7",
+              "PrivateIp",
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::EC2::DHCPOptions",
+    },
+    "ClientInstanceProfile89AE75A3": {
+      "DependsOn": [
+        "ClientDhcpAssociation",
+      ],
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ClientInstanceRole5C37E2F7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "ClientInstanceRole5C37E2F7": {
+      "DependsOn": [
+        "ClientDhcpAssociation",
+      ],
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Client",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ClientLaunchTemplate01B5BC16": {
+      "DependsOn": [
+        "ClientDhcpAssociation",
+      ],
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "ClientLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "ClientSecurityGroupE3B38CB0": {
+      "Properties": {
+        "GroupDescription": "Client instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ClientSecurityGroupfromTestStackClientVpcEiceSecurityGroup9A666DBA22DA4D63AB": {
+      "Properties": {
+        "Description": "SSH from EICE",
+        "FromPort": 22,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ClientSecurityGroupE3B38CB0",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ClientVpcEiceSecurityGroup6CB78ADC",
+            "GroupId",
+          ],
+        },
+        "ToPort": 22,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "ClientVpcEE52FE2F": {
+      "Properties": {
+        "CidrBlock": "10.1.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/ClientVpc/Vpc",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "ClientVpcEice5DBCBC72": {
+      "Properties": {
+        "PreserveClientIp": false,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ClientVpcEiceSecurityGroup6CB78ADC",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "ClientVpcWorkloadSubnet1SubnetEE74BB22",
+        },
+      },
+      "Type": "AWS::EC2::InstanceConnectEndpoint",
+    },
+    "ClientVpcEiceSecurityGroup6CB78ADC": {
+      "Properties": {
+        "GroupDescription": "Security group for EC2 Instance Connect Endpoint",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "ClientVpcEE52FE2F",
+                "CidrBlock",
+              ],
+            },
+            "Description": "Allow SSH to instances in this VPC",
+            "FromPort": 22,
+            "IpProtocol": "tcp",
+            "ToPort": 22,
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ClientVpcTgwSubnet1RouteTableAssociation3E2A9F59": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ClientVpcTgwSubnet1RouteTableD412BF4A",
+        },
+        "SubnetId": {
+          "Ref": "ClientVpcTgwSubnet1Subnet0BC64F63",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "ClientVpcTgwSubnet1RouteTableD412BF4A": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/ClientVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "ClientVpcTgwSubnet1Subnet0BC64F63": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.1.1.0/28",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Tgw",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/ClientVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "ClientVpcWorkloadSubnet1RouteTable012FE5B9": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/ClientVpc/Vpc/WorkloadSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "ClientVpcWorkloadSubnet1RouteTableAssociation204E8BCB": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "ClientVpcWorkloadSubnet1RouteTable012FE5B9",
+        },
+        "SubnetId": {
+          "Ref": "ClientVpcWorkloadSubnet1SubnetEE74BB22",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "ClientVpcWorkloadSubnet1SubnetEE74BB22": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.1.0.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Workload",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/ClientVpc/Vpc/WorkloadSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "DnsFirewallAllowListE608A677": {
+      "Properties": {
+        "Domains": [
+          "*.classmethod.jp",
+          "*.amazonaws.com",
+        ],
+      },
+      "Type": "AWS::Route53Resolver::FirewallDomainList",
+    },
+    "DnsFirewallAssociation0ABBC82C7": {
+      "Properties": {
+        "FirewallRuleGroupId": {
+          "Fn::GetAtt": [
+            "DnsFirewallRuleGroupDF6FDE12",
+            "Id",
+          ],
+        },
+        "Priority": 101,
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
+    },
+    "DnsFirewallAssociation12BC547DF": {
+      "Properties": {
+        "FirewallRuleGroupId": {
+          "Fn::GetAtt": [
+            "DnsFirewallRuleGroupDF6FDE12",
+            "Id",
+          ],
+        },
+        "Priority": 101,
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
+    },
+    "DnsFirewallAssociation2EF9FA28F": {
+      "Properties": {
+        "FirewallRuleGroupId": {
+          "Fn::GetAtt": [
+            "DnsFirewallRuleGroupDF6FDE12",
+            "Id",
+          ],
+        },
+        "Priority": 101,
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
+    },
+    "DnsFirewallBlockListD802E20F": {
+      "Properties": {
+        "Domains": [
+          "*",
+        ],
+      },
+      "Type": "AWS::Route53Resolver::FirewallDomainList",
+    },
+    "DnsFirewallRuleGroupDF6FDE12": {
+      "Properties": {
+        "FirewallRules": [
+          {
+            "Action": "ALLOW",
+            "FirewallDomainListId": {
+              "Fn::GetAtt": [
+                "DnsFirewallAllowListE608A677",
+                "Id",
+              ],
+            },
+            "FirewallDomainRedirectionAction": "TRUST_REDIRECTION_DOMAIN",
+            "Priority": 1,
+          },
+          {
+            "Action": "BLOCK",
+            "BlockResponse": "NXDOMAIN",
+            "FirewallDomainListId": {
+              "Fn::GetAtt": [
+                "DnsFirewallBlockListD802E20F",
+                "Id",
+              ],
+            },
+            "Priority": 2,
+          },
+        ],
+      },
+      "Type": "AWS::Route53Resolver::FirewallRuleGroup",
+    },
+    "DnsServerFF4C19E7": {
+      "DependsOn": [
+        "DnsServerInstanceRole8DAB4350",
+      ],
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "IamInstanceProfile": {
+          "Ref": "DnsServerInstanceProfile76079246",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.micro",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "DnsServerLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "DnsServerLaunchTemplate0F66CBCC",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "DnsServerSecurityGroup19ED433E",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "DnsVpcWorkloadSubnet1SubnetBAFF9BC2",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsServer",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+set -euxo pipefail
+dnf install -y dnsmasq
+cat > /etc/dnsmasq.conf <<'EOF'
+port=53
+no-resolv
+server=169.254.169.253
+bind-dynamic
+EOF
+systemctl enable --now dnsmasq",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "DnsServerInstanceProfile76079246": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "DnsServerInstanceRole8DAB4350",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "DnsServerInstanceRole8DAB4350": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsServer",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DnsServerLaunchTemplate0F66CBCC": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "DnsServerLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "DnsServerSecurityGroup19ED433E": {
+      "Properties": {
+        "GroupDescription": "Self-managed DNS server",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.1.0.0/16",
+            "Description": "DNS UDP from client VPC",
+            "FromPort": 53,
+            "IpProtocol": "udp",
+            "ToPort": 53,
+          },
+          {
+            "CidrIp": "10.1.0.0/16",
+            "Description": "DNS TCP from client VPC",
+            "FromPort": 53,
+            "IpProtocol": "tcp",
+            "ToPort": 53,
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "DnsServerSecurityGroupfromTestStackDnsVpcEiceSecurityGroup8A8D786F221064CB1C": {
+      "Properties": {
+        "Description": "SSH from EICE",
+        "FromPort": 22,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "DnsServerSecurityGroup19ED433E",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "DnsVpcEiceSecurityGroupB1C0C72E",
+            "GroupId",
+          ],
+        },
+        "ToPort": 22,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "DnsVpcA93E6160": {
+      "Properties": {
+        "CidrBlock": "10.2.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsVpc/Vpc",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "DnsVpcEiceAA33AA7B": {
+      "Properties": {
+        "PreserveClientIp": false,
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "DnsVpcEiceSecurityGroupB1C0C72E",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "DnsVpcWorkloadSubnet1SubnetBAFF9BC2",
+        },
+      },
+      "Type": "AWS::EC2::InstanceConnectEndpoint",
+    },
+    "DnsVpcEiceSecurityGroupB1C0C72E": {
+      "Properties": {
+        "GroupDescription": "Security group for EC2 Instance Connect Endpoint",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "DnsVpcA93E6160",
+                "CidrBlock",
+              ],
+            },
+            "Description": "Allow SSH to instances in this VPC",
+            "FromPort": 22,
+            "IpProtocol": "tcp",
+            "ToPort": 22,
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "DnsVpcTgwSubnet1RouteTable3271B74E": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "DnsVpcTgwSubnet1RouteTableAssociationF2ECC399": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "DnsVpcTgwSubnet1RouteTable3271B74E",
+        },
+        "SubnetId": {
+          "Ref": "DnsVpcTgwSubnet1Subnet2DB155DF",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "DnsVpcTgwSubnet1Subnet2DB155DF": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.2.1.0/28",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Tgw",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "DnsVpcWorkloadSubnet1RouteTable9BD9C8B7": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsVpc/Vpc/WorkloadSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "DnsVpcWorkloadSubnet1RouteTableAssociation702DDAFB": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "DnsVpcWorkloadSubnet1RouteTable9BD9C8B7",
+        },
+        "SubnetId": {
+          "Ref": "DnsVpcWorkloadSubnet1SubnetBAFF9BC2",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "DnsVpcWorkloadSubnet1SubnetBAFF9BC2": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.2.0.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Workload",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/DnsVpc/Vpc/WorkloadSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "FirewallToTgw0": {
+      "DependsOn": [
+        "TransitGatewayHubInspectionAttachment6B206C1C",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "10.1.0.0/16",
+        "RouteTableId": {
+          "Ref": "InspectionVpcFirewallSubnet1RouteTable9EFA3188",
+        },
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "FirewallToTgw1": {
+      "DependsOn": [
+        "TransitGatewayHubInspectionAttachment6B206C1C",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "10.2.0.0/16",
+        "RouteTableId": {
+          "Ref": "InspectionVpcFirewallSubnet1RouteTable9EFA3188",
+        },
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpc238DD311": {
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "InspectionVpcFirewallA6CAE766": {
+      "Properties": {
+        "FirewallName": "TestStackInspectionVpc44AB0CD8-Firewall",
+        "FirewallPolicyArn": {
+          "Fn::GetAtt": [
+            "NetworkFirewallRulesPolicy5B80E5CC",
+            "FirewallPolicyArn",
+          ],
+        },
+        "SubnetMappings": [
+          {
+            "SubnetId": {
+              "Ref": "InspectionVpcFirewallSubnet1Subnet3F8A5C7F",
+            },
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::NetworkFirewall::Firewall",
+    },
+    "InspectionVpcFirewallLogging9CE39941": {
+      "Properties": {
+        "FirewallArn": {
+          "Fn::GetAtt": [
+            "InspectionVpcFirewallA6CAE766",
+            "FirewallArn",
+          ],
+        },
+        "LoggingConfiguration": {
+          "LogDestinationConfigs": [
+            {
+              "LogDestination": {
+                "logGroup": {
+                  "Ref": "InspectionVpcNfwAlertLogGroupE2FBDE47",
+                },
+              },
+              "LogDestinationType": "CloudWatchLogs",
+              "LogType": "ALERT",
+            },
+            {
+              "LogDestination": {
+                "logGroup": {
+                  "Ref": "InspectionVpcNfwFlowLogGroupE2AF9856",
+                },
+              },
+              "LogDestinationType": "CloudWatchLogs",
+              "LogType": "FLOW",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::NetworkFirewall::LoggingConfiguration",
+    },
+    "InspectionVpcFirewallSubnet1RouteTable9EFA3188": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/FirewallSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "InspectionVpcFirewallSubnet1RouteTableAssociation2C22DD2F": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "InspectionVpcFirewallSubnet1RouteTable9EFA3188",
+        },
+        "SubnetId": {
+          "Ref": "InspectionVpcFirewallSubnet1Subnet3F8A5C7F",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "InspectionVpcFirewallSubnet1Subnet3F8A5C7F": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.16/28",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Firewall",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/FirewallSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "InspectionVpcFirewallToNat64B7E81E": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "InspectionVpcNatGateway1EBE87FD",
+        },
+        "RouteTableId": {
+          "Ref": "InspectionVpcFirewallSubnet1RouteTable9EFA3188",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpcIGW5350D1B3": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::InternetGateway",
+    },
+    "InspectionVpcNatEipC775CE28": {
+      "Properties": {
+        "Domain": "vpc",
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "InspectionVpcNatGateway1EBE87FD": {
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "InspectionVpcNatEipC775CE28",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": {
+          "Ref": "InspectionVpcPublicSubnet1Subnet30F50A30",
+        },
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "InspectionVpcNfwAlertLogGroupE2FBDE47": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 30,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "InspectionVpcNfwFlowLogGroupE2AF9856": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 30,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "InspectionVpcPublicSubnet1DefaultRoute898F5337": {
+      "DependsOn": [
+        "InspectionVpcVPCGW92D92FBC",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InspectionVpcIGW5350D1B3",
+        },
+        "RouteTableId": {
+          "Ref": "InspectionVpcPublicSubnet1RouteTable1AE145F5",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpcPublicSubnet1RouteTable1AE145F5": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/PublicSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "InspectionVpcPublicSubnet1RouteTableAssociation499BA3E2": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "InspectionVpcPublicSubnet1RouteTable1AE145F5",
+        },
+        "SubnetId": {
+          "Ref": "InspectionVpcPublicSubnet1Subnet30F50A30",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "InspectionVpcPublicSubnet1Subnet30F50A30": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/28",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/PublicSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "InspectionVpcPublicToFirewall0C8B3FCE2": {
+      "Properties": {
+        "DestinationCidrBlock": "10.1.0.0/16",
+        "RouteTableId": {
+          "Ref": "InspectionVpcPublicSubnet1RouteTable1AE145F5",
+        },
+        "VpcEndpointId": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::GetAtt": [
+                        "InspectionVpcFirewallA6CAE766",
+                        "EndpointIds",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpcPublicToFirewall1AA91C8BE": {
+      "Properties": {
+        "DestinationCidrBlock": "10.2.0.0/16",
+        "RouteTableId": {
+          "Ref": "InspectionVpcPublicSubnet1RouteTable1AE145F5",
+        },
+        "VpcEndpointId": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::GetAtt": [
+                        "InspectionVpcFirewallA6CAE766",
+                        "EndpointIds",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpcTgwSubnet1RouteTableAssociation2625F31F": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "InspectionVpcTgwSubnet1RouteTableB4F0B58A",
+        },
+        "SubnetId": {
+          "Ref": "InspectionVpcTgwSubnet1SubnetE2442DA9",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "InspectionVpcTgwSubnet1RouteTableB4F0B58A": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "InspectionVpcTgwSubnet1SubnetE2442DA9": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.32/28",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Tgw",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Isolated",
+          },
+          {
+            "Key": "Name",
+            "Value": "TestStack/InspectionVpc/Vpc/TgwSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "InspectionVpcTgwToFirewall62AD643C": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "InspectionVpcTgwSubnet1RouteTableB4F0B58A",
+        },
+        "VpcEndpointId": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::GetAtt": [
+                        "InspectionVpcFirewallA6CAE766",
+                        "EndpointIds",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "InspectionVpcVPCGW92D92FBC": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "InspectionVpcIGW5350D1B3",
+        },
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+    },
+    "NetworkFirewallRulesPolicy5B80E5CC": {
+      "Properties": {
+        "FirewallPolicy": {
+          "StatefulDefaultActions": [
+            "aws:drop_established_app_layer",
+            "aws:alert_established_app_layer",
+          ],
+          "StatefulEngineOptions": {
+            "RuleOrder": "STRICT_ORDER",
+          },
+          "StatefulRuleGroupReferences": [
+            {
+              "Priority": 1,
+              "ResourceArn": {
+                "Fn::GetAtt": [
+                  "NetworkFirewallRulesStatefulRuleGroup0E9063D1",
+                  "RuleGroupArn",
+                ],
+              },
+            },
+          ],
+          "StatelessDefaultActions": [
+            "aws:forward_to_sfe",
+          ],
+          "StatelessFragmentDefaultActions": [
+            "aws:forward_to_sfe",
+          ],
+        },
+        "FirewallPolicyName": "TestStackNetworkFirewallRulesFBE82640-Policy",
+      },
+      "Type": "AWS::NetworkFirewall::FirewallPolicy",
+    },
+    "NetworkFirewallRulesStatefulRuleGroup0E9063D1": {
+      "Properties": {
+        "Capacity": 200,
+        "RuleGroup": {
+          "RuleVariables": {
+            "IPSets": {
+              "DNS_SERVER": {
+                "Definition": [
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Fn::GetAtt": [
+                            "DnsServerFF4C19E7",
+                            "PrivateIp",
+                          ],
+                        },
+                        "/32",
+                      ],
+                    ],
+                  },
+                ],
+              },
+              "HOME_NET": {
+                "Definition": [
+                  "10.1.0.0/16",
+                  "10.2.0.0/16",
+                ],
+              },
+            },
+          },
+          "RulesSource": {
+            "RulesString": "pass dns $HOME_NET any -> $DNS_SERVER 53 (msg:"Allow DNS query to self-managed"; flow:to_server; sid:1000001;)
+pass tls $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow SNI .classmethod.jp"; flow:to_server; ssl_state:client_hello; tls.sni; content:".classmethod.jp"; dotprefix; endswith; nocase; sid:1000002;)
+pass http $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow Host .classmethod.jp"; flow:to_server; http.host; content:".classmethod.jp"; dotprefix; endswith; sid:1000003;)
+pass tls $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow SNI .amazonaws.com"; flow:to_server; ssl_state:client_hello; tls.sni; content:".amazonaws.com"; dotprefix; endswith; nocase; sid:1000004;)
+pass http $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow Host .amazonaws.com"; flow:to_server; http.host; content:".amazonaws.com"; dotprefix; endswith; sid:1000005;)
+pass tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow TCP keepalive/window to_server"; tcp.flags:A; dsize:0; flow:established,to_server; sid:1000006;)
+pass tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Allow TCP keepalive/window to_client"; tcp.flags:A; dsize:0; flow:established,to_client; sid:1000007;)
+pass tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Allow TCP reset to_server"; tcp.flags:+R; dsize:0; flow:established,to_server; sid:1000008;)
+pass tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Allow TCP reset to_client"; tcp.flags:+R; dsize:0; flow:established,to_client; sid:1000009;)",
+          },
+          "StatefulRuleOptions": {
+            "RuleOrder": "STRICT_ORDER",
+          },
+        },
+        "RuleGroupName": "TestStackNetworkFirewallRulesFBE82640-StatefulRuleGroup",
+        "Type": "STATEFUL",
+      },
+      "Type": "AWS::NetworkFirewall::RuleGroup",
+    },
+    "Spoke0DefaultRoute0": {
+      "DependsOn": [
+        "TransitGatewayHubSpokeAttachment07055C07A",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "ClientVpcWorkloadSubnet1RouteTable012FE5B9",
+        },
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "Spoke1DefaultRoute0": {
+      "DependsOn": [
+        "TransitGatewayHubSpokeAttachment1283DC5E3",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "DnsVpcWorkloadSubnet1RouteTable9BD9C8B7",
+        },
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "TransitGatewayHubInspectionAssociationCCE97826": {
+      "Properties": {
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubInspectionAttachment6B206C1C",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubInspectionRouteTable6FD5CE61",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRouteTableAssociation",
+    },
+    "TransitGatewayHubInspectionAttachment6B206C1C": {
+      "Properties": {
+        "SubnetIds": [
+          {
+            "Ref": "InspectionVpcTgwSubnet1SubnetE2442DA9",
+          },
+        ],
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+        "VpcId": {
+          "Ref": "InspectionVpc238DD311",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayVpcAttachment",
+    },
+    "TransitGatewayHubInspectionRouteTable6FD5CE61": {
+      "Properties": {
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRouteTable",
+    },
+    "TransitGatewayHubInspectionRouteToSpoke03B18AEFB": {
+      "Properties": {
+        "DestinationCidrBlock": "10.1.0.0/16",
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubSpokeAttachment07055C07A",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubInspectionRouteTable6FD5CE61",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRoute",
+    },
+    "TransitGatewayHubInspectionRouteToSpoke129F14AB7": {
+      "Properties": {
+        "DestinationCidrBlock": "10.2.0.0/16",
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubSpokeAttachment1283DC5E3",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubInspectionRouteTable6FD5CE61",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRoute",
+    },
+    "TransitGatewayHubSpokeAssociation028D44976": {
+      "Properties": {
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubSpokeAttachment07055C07A",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubSpokeRouteTable8886621B",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRouteTableAssociation",
+    },
+    "TransitGatewayHubSpokeAssociation1A8041A2A": {
+      "Properties": {
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubSpokeAttachment1283DC5E3",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubSpokeRouteTable8886621B",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRouteTableAssociation",
+    },
+    "TransitGatewayHubSpokeAttachment07055C07A": {
+      "Properties": {
+        "SubnetIds": [
+          {
+            "Ref": "ClientVpcTgwSubnet1Subnet0BC64F63",
+          },
+        ],
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+        "VpcId": {
+          "Ref": "ClientVpcEE52FE2F",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayVpcAttachment",
+    },
+    "TransitGatewayHubSpokeAttachment1283DC5E3": {
+      "Properties": {
+        "SubnetIds": [
+          {
+            "Ref": "DnsVpcTgwSubnet1Subnet2DB155DF",
+          },
+        ],
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+        "VpcId": {
+          "Ref": "DnsVpcA93E6160",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayVpcAttachment",
+    },
+    "TransitGatewayHubSpokeDefaultRouteABD345A8": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "TransitGatewayAttachmentId": {
+          "Ref": "TransitGatewayHubInspectionAttachment6B206C1C",
+        },
+        "TransitGatewayRouteTableId": {
+          "Ref": "TransitGatewayHubSpokeRouteTable8886621B",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRoute",
+    },
+    "TransitGatewayHubSpokeRouteTable8886621B": {
+      "Properties": {
+        "TransitGatewayId": {
+          "Ref": "TransitGatewayHubTransitGatewayC9D3CB9D",
+        },
+      },
+      "Type": "AWS::EC2::TransitGatewayRouteTable",
+    },
+    "TransitGatewayHubTransitGatewayC9D3CB9D": {
+      "Properties": {
+        "AutoAcceptSharedAttachments": "disable",
+        "DefaultRouteTableAssociation": "disable",
+        "DefaultRouteTablePropagation": "disable",
+        "Description": "Inspection hub TGW",
+      },
+      "Type": "AWS::EC2::TransitGateway",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

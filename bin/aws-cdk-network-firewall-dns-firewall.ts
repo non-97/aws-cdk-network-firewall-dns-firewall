@@ -3,18 +3,15 @@ import * as cdk from 'aws-cdk-lib/core';
 import { AwsCdkNetworkFirewallDnsFirewallStack } from '../lib/aws-cdk-network-firewall-dns-firewall-stack';
 
 const app = new cdk.App();
+
 new AwsCdkNetworkFirewallDnsFirewallStack(app, 'AwsCdkNetworkFirewallDnsFirewallStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
+  // バージニアではなく東京リージョンに固定。account は awsume 後の環境変数から解決する。
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'ap-northeast-1' },
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+  // 許可ドメインの single source(DNS Firewall 構文)。
+  // ここが唯一の編集点で、DNS Firewall のドメインリストと NFW の SNI/Host 許可ルールの両方を生成する。
+  allowedDomains: [
+    '*.classmethod.jp', // 検証対象のホワイトリスト
+    '*.amazonaws.com', // EC2 起動(AL2023 dnf リポジトリ)に必須のブートストラップ用
+  ],
 });
